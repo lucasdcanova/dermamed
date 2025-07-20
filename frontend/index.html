@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DermaMed - Análise Dermatológica com IA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🩺 DermaMed</h1>
+            <p>Análise Dermatológica Powered by MedGemma AI</p>
+            <div id="auth-status" class="auth-status">
+                <span id="user-info">Não autenticado</span>
+                <button id="auth-btn" class="btn-secondary">Login</button>
+            </div>
+        </header>
+
+        <!-- Login Modal -->
+        <div id="login-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Login</h2>
+                <form id="login-form">
+                    <input type="text" id="username" placeholder="Usuário" value="demo_doctor" required>
+                    <input type="password" id="password" placeholder="Senha" value="demo123" required>
+                    <button type="submit" class="btn-primary">Entrar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <h2>📸 Upload de Imagem</h2>
+                <div class="upload-area" id="upload-area">
+                    <input type="file" id="file-input" accept="image/*" hidden>
+                    <div class="upload-prompt">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <p>Clique ou arraste uma imagem dermatológica</p>
+                        <small>Formatos: JPG, PNG, BMP (máx. 50MB)</small>
+                    </div>
+                    <img id="preview" class="preview-image" style="display: none;">
+                </div>
+
+                <!-- Clinical Data -->
+                <div class="clinical-data">
+                    <h3>Dados Clínicos (Opcional)</h3>
+                    <form id="clinical-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Idade:</label>
+                                <input type="number" id="patient-age" min="0" max="150" placeholder="Ex: 45">
+                            </div>
+                            <div class="form-group">
+                                <label>Sexo:</label>
+                                <select id="patient-sex">
+                                    <option value="">Selecione</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                    <option value="O">Outro</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Localização da Lesão:</label>
+                            <input type="text" id="lesion-location" placeholder="Ex: Braço esquerdo">
+                        </div>
+                        <div class="form-group">
+                            <label>Duração dos Sintomas:</label>
+                            <input type="text" id="symptoms-duration" placeholder="Ex: 3 meses">
+                        </div>
+                        <div class="form-group">
+                            <label>Histórico Clínico:</label>
+                            <textarea id="clinical-history" rows="3" placeholder="Descreva o histórico relevante..."></textarea>
+                        </div>
+                    </form>
+                </div>
+
+                <button id="analyze-btn" class="btn-primary btn-large" disabled>
+                    <span id="btn-text">Analisar Imagem</span>
+                    <span id="btn-spinner" class="spinner" style="display: none;"></span>
+                </button>
+
+                <button id="demo-btn" class="btn-secondary">
+                    Testar com Dados de Demonstração
+                </button>
+            </section>
+
+            <!-- Results Section -->
+            <section id="results-section" class="results-section" style="display: none;">
+                <h2>📊 Resultados da Análise</h2>
+                
+                <div class="alert alert-warning">
+                    <strong>⚠️ Aviso Importante:</strong>
+                    <p id="disclaimer"></p>
+                </div>
+
+                <div class="results-grid">
+                    <!-- Primary Diagnosis -->
+                    <div class="result-card">
+                        <h3>Diagnóstico Principal</h3>
+                        <div class="primary-diagnosis">
+                            <span id="primary-diagnosis-text">-</span>
+                            <div class="confidence-meter">
+                                <div class="confidence-fill" id="confidence-fill"></div>
+                                <span class="confidence-text" id="confidence-text">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Assessment -->
+                    <div class="result-card">
+                        <h3>Avaliação de Risco</h3>
+                        <div id="risk-assessment" class="risk-badge">-</div>
+                        <p id="biopsy-recommendation" class="biopsy-text"></p>
+                    </div>
+
+                    <!-- ABCDE Criteria -->
+                    <div class="result-card" id="abcde-card" style="display: none;">
+                        <h3>Critérios ABCDE</h3>
+                        <div class="abcde-list">
+                            <div class="abcde-item">
+                                <span>Assimetria:</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="asymmetry-bar"></div>
+                                </div>
+                                <span id="asymmetry-value">-</span>
+                            </div>
+                            <div class="abcde-item">
+                                <span>Borda:</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="border-bar"></div>
+                                </div>
+                                <span id="border-value">-</span>
+                            </div>
+                            <div class="abcde-item">
+                                <span>Cor:</span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="color-bar"></div>
+                                </div>
+                                <span id="color-value">-</span>
+                            </div>
+                            <div class="abcde-item">
+                                <span>Diâmetro:</span>
+                                <span id="diameter-value">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Differential Diagnoses -->
+                    <div class="result-card">
+                        <h3>Diagnósticos Diferenciais</h3>
+                        <ul id="differential-list" class="differential-list">
+                            <li>Carregando...</li>
+                        </ul>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="result-card full-width">
+                        <h3>Recomendações</h3>
+                        <ul id="recommendations-list" class="recommendations-list">
+                            <li>Carregando...</li>
+                        </ul>
+                        <p class="follow-up">Acompanhamento: <span id="follow-up-interval">-</span></p>
+                    </div>
+                </div>
+
+                <div class="result-metadata">
+                    <small>ID da Análise: <span id="analysis-id">-</span></small>
+                    <small>Tempo de Processamento: <span id="processing-time">-</span>s</small>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>DermaMed &copy; 2025 - Ferramenta de Suporte à Decisão Clínica</p>
+            <p class="disclaimer-footer">Não aprovado para uso diagnóstico independente</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
