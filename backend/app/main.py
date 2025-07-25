@@ -5,7 +5,7 @@ import logging
 import os
 
 from app.core.config import get_settings
-from app.api import health, analysis, auth
+from app.api import health, analysis, auth, analysis_test
 from app.core.logging_config import setup_logging
 
 settings = get_settings()
@@ -46,6 +46,7 @@ app.add_middleware(
 app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(auth.router, prefix=f"{settings.api_v1_str}/auth", tags=["authentication"])
 app.include_router(analysis.router, prefix=f"{settings.api_v1_str}/analysis", tags=["analysis"])
+app.include_router(analysis_test.router, prefix=f"{settings.api_v1_str}/test", tags=["test"])
 
 @app.get("/")
 async def root():

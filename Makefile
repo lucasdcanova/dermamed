@@ -31,10 +31,10 @@ run-backend:
 	@echo "Starting backend server..."
 	cd backend && python run_dev.py
 
-# Run frontend server (placeholder)
+# Run frontend server
 run-frontend:
-	@echo "Frontend not yet implemented"
-	@echo "Run 'make run-backend' to start the API server"
+	@echo "Starting frontend server..."
+	cd frontend && npm install && npm run dev
 
 # Build Docker images
 build:
