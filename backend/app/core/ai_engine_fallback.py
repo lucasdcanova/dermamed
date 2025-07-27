@@ -23,7 +23,10 @@ class DermatologyAIFallback:
     """Fallback AI engine using general vision models when MedGemma is not available"""
     
     def __init__(self):
-        self.client = InferenceClient(token=settings.huggingface_token)
+        # Only initialize client if token is available
+        self.client = None
+        if settings.huggingface_token:
+            self.client = InferenceClient(token=settings.huggingface_token)
         self._initialized = True
         logger.info("DermatologyAI Fallback initialized")
     
@@ -38,12 +41,16 @@ class DermatologyAIFallback:
                 image_data = f.read()
             
             # Try to get basic image features (using a general model)
-            try:
-                # Use a general image classification model
-                result = self.client.image_classification(image_data)
-                logger.info(f"Classification result: {result}")
-            except Exception as e:
-                logger.warning(f"Image classification failed: {e}")
+            if self.client:
+                try:
+                    # Use a general image classification model
+                    result = self.client.image_classification(image_data)
+                    logger.info(f"Classification result: {result}")
+                except Exception as e:
+                    logger.warning(f"Image classification failed: {e}")
+                    result = []
+            else:
+                logger.info("No HuggingFace client available, using basic analysis")
                 result = []
             
             # Generate mock medical analysis based on image properties
@@ -57,8 +64,14 @@ class DermatologyAIFallback:
             img_small = img.resize((50, 50))
             colors = img_small.getcolors(maxcolors=256)
             
+            # Handle case where getcolors returns None (too many colors)
+            if colors is None:
+                num_colors = 256  # Maximum colors
+            else:
+                num_colors = len(colors)
+            
             # Mock analysis based on basic features
-            if len(colors) > 100:
+            if num_colors > 100:
                 primary = "Complex pigmented lesion"
                 confidence = 0.65
                 risk = "Medium risk - requires evaluation"
@@ -89,8 +102,8 @@ class DermatologyAIFallback:
                 ],
                 lesion_characteristics=LesionCharacteristics(
                     asymmetry=0.3 if aspect_ratio > 1.2 else 0.1,
-                    border_irregularity=0.4 if len(colors) > 100 else 0.2,
-                    color_variation=min(len(colors) / 200, 1.0),
+                    border_irregularity=0.4 if num_colors > 100 else 0.2,
+                    color_variation=min(num_colors / 200, 1.0),
                     diameter_mm=round(min(width, height) / 10, 1)
                 ),
                 risk_assessment=risk,

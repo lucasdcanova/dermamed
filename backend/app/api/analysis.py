@@ -324,29 +324,29 @@ async def test_real_analysis(
         
         # Create compliance info
         compliance_info = ComplianceInfo(
-                disclaimer=MEDICAL_DISCLAIMER,
-                intended_use=COMPLIANCE_MESSAGES["intended_use"],
-                regulatory_status=COMPLIANCE_MESSAGES["not_for_diagnosis"],
-                analysis_limitations=[
-                    "Test mode - for demonstration only",
-                    "Not for clinical use",
-                    "Requires validation by healthcare professionals"
-                ]
-            )
-            
-            # Create response
-            response = AnalysisResponse(
-                id=analysis_id,
-                status=AnalysisStatus.COMPLETED,
-                image_metadata=image_metadata,
-                analysis=analysis_result,
-                compliance=compliance_info,
-                processing_time_seconds=analysis_result.processing_time if hasattr(analysis_result, 'processing_time') else None
-            )
-            
-            return response
-            
-        except Exception as e:
+            disclaimer=MEDICAL_DISCLAIMER,
+            intended_use=COMPLIANCE_MESSAGES["intended_use"],
+            regulatory_status=COMPLIANCE_MESSAGES["not_for_diagnosis"],
+            analysis_limitations=[
+                "Test mode - for demonstration only",
+                "Not for clinical use",
+                "Requires validation by healthcare professionals"
+            ]
+        )
+        
+        # Create response
+        response = AnalysisResponse(
+            id=analysis_id,
+            status=AnalysisStatus.COMPLETED,
+            image_metadata=image_metadata,
+            analysis=analysis_result,
+            compliance=compliance_info,
+            processing_time_seconds=analysis_result.processing_time if hasattr(analysis_result, 'processing_time') else None
+        )
+        
+        return response
+        
+    except Exception as e:
             logger.error(f"Real analysis failed: {str(e)}", extra={"analysis_id": analysis_id})
             
             # Return error response
