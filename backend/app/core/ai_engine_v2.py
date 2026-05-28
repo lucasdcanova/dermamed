@@ -9,6 +9,7 @@ import io
 from huggingface_hub import InferenceClient
 
 from app.core.config import get_settings, MEDICAL_DISCLAIMER
+from app.core.ai_engine_fallback import DermatologyAIFallback
 from app.schemas.analysis import (
     AnalysisResult, 
     DifferentialDiagnosis, 
@@ -27,6 +28,8 @@ class DermatologyAI:
         )
         self._initialized = True
         logger.info("DermatologyAI initialized with Hugging Face Inference API")
+        # Lazy fallback engine — instantiated on first failure to avoid double HF token init
+        self._fallback: Optional[DermatologyAIFallback] = None
     
     def image_to_base64(self, image_path: str) -> str:
         """Convert image to base64 string"""
@@ -117,8 +120,36 @@ class DermatologyAI:
             return analysis_result
             
         except Exception as e:
-            logger.error(f"Analysis failed: {str(e)}")
-            raise RuntimeError(f"Analysis failed: {str(e)}")
+            logger.error(
+                "Primary MedGemma analysis failed; attempting fallback engine",
+                extra={"medical_data": True, "primary_error": str(e)},
+            )
+            # Lazy-instantiate fallback to keep startup cheap
+            if self._fallback is None:
+                try:
+                    self._fallback = DermatologyAIFallback()
+                except Exception as init_err:
+                    logger.error(f"Fallback engine init failed: {init_err}")
+                    raise RuntimeError(
+                        f"Primary engine failed ({e}); fallback init failed ({init_err})"
+                    ) from e
+            try:
+                result = self._fallback.analyze(image_path, clinical_context)
+                # Mark the result as having come from the degraded path so the
+                # caller can surface this to the clinician downstream.
+                if hasattr(result, "model_used"):
+                    result.model_used = "fallback"
+                logger.info(
+                    "Fallback analysis succeeded",
+                    extra={"medical_data": True, "engine": "fallback"},
+                )
+                return result
+            except Exception as fb_err:
+                logger.error(f"Fallback analysis also failed: {fb_err}")
+                raise RuntimeError(
+                    f"Both primary and fallback engines failed. "
+                    f"Primary: {e} | Fallback: {fb_err}"
+                ) from e
     
     def _build_analysis_prompt(self, clinical_context: Optional[Dict[str, Any]] = None) -> str:
         """Build the prompt for MedGemma analysis"""
