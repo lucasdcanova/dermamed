@@ -1,7 +1,30 @@
 # DermaMed - Dermatological Analysis Software Architecture
 
+> **Historical / aspirational design document.** This file was drafted during
+> the initial scoping of DermaMed in mid-2025 and describes the *intended*
+> shape of a hypothetical product, not what the code actually implements.
+> Several sections (EHR integration, mobile app, Kubernetes, GCP, HIPAA/GDPR
+> compliance, "Class II / IIa" classification) describe future-state work
+> that **has not been performed and is not present in the codebase**. Treat
+> this document as a developer's planning sketch.
+>
+> For the authoritative non-device statement, see
+> [`DISCLAIMER.md`](DISCLAIMER.md). For the regulatory pathway analysis, see
+> [`REGULATORY_POSITION.md`](REGULATORY_POSITION.md). For what is actually
+> built today, see the project [`README.md`](../README.md) section
+> "What works, what doesn't".
+>
+> Nothing in this document should be read as a regulatory claim, a clinical
+> claim, or a representation that DermaMed is HIPAA-, GDPR-, or
+> LGPD-compliant. It is not.
+
 ## Overview
-DermaMed is a dermatological analysis software powered by Google's MedGemma AI model, designed to assist healthcare professionals in analyzing skin conditions.
+DermaMed is a dermatological analysis **research prototype** that wires
+Google's MedGemma 4B vision-language model into a FastAPI scaffold. The
+original scoping document framed it as software "designed to assist
+healthcare professionals" — that framing is aspirational only; in practice
+the repository is research code with no clinical validation and no
+regulatory pathway. See the banner above.
 
 ## Core Components
 
@@ -58,11 +81,14 @@ DermaMed is a dermatological analysis software powered by Google's MedGemma AI m
 3. **Feature Detection**: Lesion characteristics (ABCDE criteria)
 4. **Differential Diagnosis**: Multiple condition probabilities
 
-#### Safety & Compliance
-1. **Disclaimers**: Clear medical device limitations
-2. **Professional Use**: Designed for healthcare professionals
-3. **Audit Trail**: Complete logging of all analyses
-4. **Data Privacy**: HIPAA/GDPR compliance
+#### Safety & Compliance (aspirational — not implemented)
+1. **Disclaimers**: present in the README and `DISCLAIMER.md`. Not surfaced
+   inside the API response body.
+2. **Professional Use**: original intent. The repository is **not**
+   distributed for clinical use; see the banner at the top of this file.
+3. **Audit Trail**: JSON-lines log file. **Not** tamper-evident, **not**
+   compliance-grade. Placeholder for what an audit pipeline would look like.
+4. **Data Privacy**: **No** HIPAA, GDPR, or LGPD controls are implemented.
 
 ### 4. Technology Stack
 
@@ -107,12 +133,24 @@ DermaMed is a dermatological analysis software powered by Google's MedGemma AI m
 - Advanced analytics
 - Mobile app
 
-### 6. Regulatory Considerations
+### 6. Regulatory Considerations (aspirational — not implemented)
 
-1. **Medical Device Classification**: Class II (FDA) / Class IIa (EU MDR)
-2. **Clinical Validation**: Required before medical use
-3. **Quality Management**: ISO 13485 compliance
-4. **Data Protection**: HIPAA, GDPR compliance
+The original scoping listed the following as items that *would* apply if the
+project were ever advanced into a product. None of them are met today.
+
+1. **Hypothetical classification** (not the current status): would likely
+   be FDA Class II SaMD / EU MDR Class IIb under Rule 11 (melanoma is
+   potentially fatal) / ANVISA Classe II under RDC 657/2022. **Current
+   status: none of these. Not a device.**
+2. **Clinical validation:** required before any medical use — **not
+   performed**.
+3. **Quality management (ISO 13485):** would be required — **not
+   implemented**.
+4. **Data protection (HIPAA / GDPR / LGPD):** would be required — **not
+   implemented**. No BAA, no DPA, no DPIA, no LIA, no ROPA.
+
+See [`REGULATORY_POSITION.md`](REGULATORY_POSITION.md) for the full
+per-jurisdiction analysis.
 
 ### 7. Model Integration Details
 

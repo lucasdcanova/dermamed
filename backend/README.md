@@ -1,6 +1,12 @@
 # DermaMed Backend
 
-AI-powered dermatological analysis system using Google's MedGemma model.
+> **Research prototype, not a medical device.** Not for clinical, diagnostic,
+> screening, or triage use. Not FDA cleared / CE marked / ANVISA registered.
+> See [`../docs/DISCLAIMER.md`](../docs/DISCLAIMER.md) and
+> [`../docs/REGULATORY_POSITION.md`](../docs/REGULATORY_POSITION.md).
+
+FastAPI scaffold wiring Google's MedGemma 4B vision-language model into a
+typed analysis pipeline. R&D only.
 
 ## Quick Start
 
@@ -97,10 +103,16 @@ docker run -p 8000:8000 --env-file .env dermamed-backend
 
 ## Security Notes
 
-- All endpoints except `/health` and `/api/v1/analysis/demo` require authentication
-- Medical data is logged separately for HIPAA compliance
-- All analyses include mandatory disclaimers
-- Not approved for diagnostic use without proper validation
+- All endpoints except `/health` and `/api/v1/analysis/demo` require
+  authentication (demo JWT only; the `demo_doctor`/`demo123` user is a
+  development placeholder, **not** a production credential).
+- The structured JSON-lines log file is a placeholder for what an audit
+  pipeline would look like. It is **not** HIPAA-compliant and is **not**
+  tamper-evident. No PHI should ever be sent to this prototype.
+- The repository is **not** approved for diagnostic, screening, or triage
+  use in any jurisdiction. See the disclaimer at the top of this file.
+- For responsible disclosure of security issues, see
+  [`../SECURITY.md`](../SECURITY.md).
 
 ## Troubleshooting
 

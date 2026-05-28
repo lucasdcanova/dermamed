@@ -65,3 +65,24 @@ htmlcov/
 .cache/
 tmp/
 temp/
+
+# Secrets — defense in depth (the top-level .env rule already covers these,
+# but list explicit nested paths to make intent unambiguous to humans and
+# pre-commit scanners). Never commit real tokens or DB URLs.
+backend/.env
+backend/.env.local
+backend/.env.*.local
+frontend/.env
+frontend/.env.local
+*.pem
+*.key
+*.p8
+
+# Uploads / models / cached artifacts (research data must not be committed)
+backend/uploads/
+backend/models/
+models/
+
+# Audit / runtime logs (explicit nested paths)
+backend/audit.log
+backend/logs/
